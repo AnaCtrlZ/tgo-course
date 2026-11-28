@@ -430,6 +430,9 @@ class BPETokenizer:
             "num_merges": len(self.merges),
             "vocab_size": len(token_vocabulary),
             "merges": self.merges,
+            # Примеры дублируются на верхнем уровне и в stats: так их ищут
+            # автотесты и так их описывает контракт работы.
+            "examples": examples,
             "stats": {
                 "chars": total_chars,
                 "words": total_words,
@@ -470,8 +473,9 @@ def build_bigram_artifact(
             break
 
     likelihood = {
-        "sentence": sentence,
-        "shuffled": shuffled,
+        # В JSON тексты хранятся строками, а для подсчёта используются списки.
+        "sentence": " ".join(sentence),
+        "shuffled": " ".join(shuffled),
         "alpha": LIKELIHOOD_ALPHA,
         "logprob_sentence": model.logprob(sentence, LIKELIHOOD_ALPHA),
         "logprob_shuffled": model.logprob(shuffled, LIKELIHOOD_ALPHA),
@@ -487,7 +491,7 @@ def build_bigram_artifact(
                 {
                     "temperature": temperature,
                     "start": start,
-                    "text": sample,
+                    "text": " ".join(sample),
                 }
             )
 
